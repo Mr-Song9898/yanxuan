@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>我的购物车</title>
+		<style type="text/css">
+			img{width: 100px;}
+			span{display: block;padding: 10px 20px;background: limegreen;border-radius: 4px;color: #fff;}
+		</style>
+	</head>
+	<body>
+		<h2>购物车<small><a href="list.html">去购物</a></small></h2>
+		<table border="1" cellspacing="0" width="950" align="center" id="tab">
+			<thead>
+				<tr>
+					<th>商品货号</th>
+					<th>图片</th>
+					<th>名称</th>
+					<th>价格</th>
+					<th>数量</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!--<tr>
+					<td><img src=""/></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td><span>删除</span></td>
+				</tr>-->
+			</tbody>
+		</table>
+	</body>
+	<script src="libs/jquery.js"></script>
+	<script src="libs/jquery.cookie.js"></script>
+	<script type="text/javascript">
+		
+		class Car{
+			constructor(options){
+				this.body = options.tbody
+				
+				this.load()
+			}
+			load(){
+				var that = this;
+				$.ajax({
+					url:"http://localhost/shopping/data/goods.json"
+				}).then(function(res){
+					that.res = res;
+					that.getCookie();
+					that.display();
+					that.remove();
+				},function(){
+					
+				})
+			}
+			getCookie(){
+				this.goods = JSON.parse($.cookie("goods"));
+			}
+			display(){
+				var that = this;
+				var str = "";
+				this.res.forEach(function(val1){
+					that.goods.forEach(function(val2){
+						if(val1.goodsId == val2.id){
+							str += `<tr data-id="${val1.goodsId}">
+										<td>${val1.goodsId}</td>
+										<td><img src="${val1.src}"/></td>
+										<td>${val1.name}</td>
+										<td>${val1.price}</td>
+										<td>${val2.num}</td>
+										<td><span>删除</span></td>
+									</tr>`
+						}
+					})
+				})
+				this.body.html(str)
+			}
+			remove(){
+				var that = this;
+				this.body.on("click","span",function(){
+					var index = $(this).parent().parent().attr("data-id");
+					for(var i=0;i<that.goods.length;i++){
+						if(that.goods[i].id == parseInt(index)){
+							break;
+						}
+					}
+					
+					that.goods.splice(i,1)
+					
+					var str = JSON.stringify(that.goods);
+					$.cookie("goods",str)
+					
+					
+					
+					$(this).parent().parent().remove()
+				})
+			}
+		}
+		
+		new Car({
+			tbody:$("tbody")
+		})
+	</script>
+</html>
